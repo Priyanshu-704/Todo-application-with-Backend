@@ -150,6 +150,40 @@
 .todo-card-btn:hover .todo-card-icon {
   transform: scale(1.2);
 }
+.completed-task {
+  
+   opacity: 0.5;
+  filter: grayscale(80%);
+  pointer-events: none;
+}
+
+/* Completed Button Styling */
+.todo-complete-btn {
+  width: 90%;
+  background: linear-gradient(135deg, #d1dd8b, #48bb78);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.todo-complete-btn:hover {
+  background: linear-gradient(135deg, #819fc5, #c6b6ec);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(192, 148, 221, 0.2);
+}
+.todo-complete-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
 
 /* Glow Animation */
 @keyframes card-glow {
@@ -176,6 +210,9 @@
   .todo-card-btn {
     padding: 0.6rem;
     font-size: 0.9rem;
+  }
+  .todo-complete-btn{
+    width: 100%;
   }
   
 

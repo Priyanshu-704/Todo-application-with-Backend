@@ -17,6 +17,7 @@ const Todo = () => {
   const [array, setArray] = useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [filter, setFilter] = useState("all");
   const isLoggedIn = useSelector((state) => state.isLoggedIn);
 
   const fetchTasks = async () => {
@@ -24,10 +25,12 @@ const Todo = () => {
       try {
         const response = await axiosInstance.get(`/v2/gettask/${id}`);
         setArray(response.data.list);
+        console.log("Fetched tasks:", response.data.list);
       } catch {
         toast.error("Failed to fetch tasks");
       }
     }
+    
   };
 
   const handleShow = () => {
@@ -40,7 +43,11 @@ const Todo = () => {
   };
 
   const handleSubmit = async () => {
-    if (inputs.title === "" || inputs.description === "" || inputs.dueDate === "") {
+    if (
+      inputs.title === "" ||
+      inputs.description === "" ||
+      inputs.dueDate === ""
+    ) {
       toast.error("Title, Description and Due date can not be empty ");
     } else {
       if (id) {
@@ -100,6 +107,16 @@ const Todo = () => {
     setShowUpdateModal(false);
   };
 
+  const handleToggleComplete = async (taskId) => {
+    try {
+      await axiosInstance.put(`/v2/togglecomplete/${taskId}`);
+      
+      fetchTasks();
+    } catch {
+      toast.error("Could not toggle task status");
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,7 +152,7 @@ const Todo = () => {
                   setInputs({ ...inputs, dueDate: e.target.value })
                 }
                 onClick={(e) => {
-                  if (e.target.showPicker) e.target.showPicker(); 
+                  if (e.target.showPicker) e.target.showPicker();
                 }}
               />
               <textarea
@@ -156,23 +173,60 @@ const Todo = () => {
             </button>
           </div>
         </div>
-        <div className="todo-list-conatiner">
+        <div className="todo-filter-buttons">
+          <div className="todo-filter-buttons">
+            <button
+              onClick={() => setFilter("all")}
+              className={`todo-filter-btn todo-btn-all ${
+                filter === "all" ? "active" : ""
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilter("pending")}
+              className={`todo-filter-btn todo-btn-pending ${
+                filter === "pending" ? "active" : ""
+              }`}
+            >
+              Pending
+            </button>
+            <button
+              onClick={() => setFilter("completed")}
+              className={`todo-filter-btn todo-btn-completed ${
+                filter === "completed" ? "active" : ""
+              }`}
+            >
+              Completed
+            </button>
+          </div>
+
           <div className="todo-grid">
             {array &&
-              array.map((item, index) => {
-                return (
-                  <div className=" todo-card-wrapper" key={index}>
-                    <TodoCard
-                      title={item.title}
-                      description={item.description}
-                      dueDate={item.dueDate}
-                      id={item._id}
-                      delid={handleDelete}
-                      displayBox={() => handleUpdate(index)}
-                    />
-                  </div>
-                );
-              })}
+              array
+                .filter((item) => {
+                  if (filter === "all") return true;
+                  if (filter === "completed") return item.isCompleted;
+                  if (filter === "pending") return !item.isCompleted;
+                  return true;
+                })
+                .map((item, index) => {
+                  return (
+                    <div className=" todo-card-wrapper" key={index}>
+                      <TodoCard
+                        title={item.title}
+                        description={item.description}
+                        dueDate={item.dueDate}
+                        id={item._id}
+                        isCompleted={item.isCompleted}
+                        delid={handleDelete}
+                        displayBox={() => handleUpdate(index)}
+                        toggleComplete={handleToggleComplete}
+                        currentFilter={filter} 
+                      />
+                    </div>
+                  );
+                })}
           </div>
         </div>
       </div>

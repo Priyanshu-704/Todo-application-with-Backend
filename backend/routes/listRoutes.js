@@ -78,4 +78,20 @@ router.get("/gettask/:id", protect, async (req, res) => {
   }
 });
 
+//update completion status
+router.put("/togglecomplete/:taskId", protect, async (req, res) => {
+  try {
+    const task = await List.findById(req.params.taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    task.isCompleted = !task.isCompleted;
+    await task.save();
+
+    res.status(200).json({ message: "Task status updated", task });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating task", error });
+  }
+});
+
+
 module.exports = router;
