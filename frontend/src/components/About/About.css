@@ -1,0 +1,129 @@
+/* About Container */
+.about-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%236e8efb20"><path d="M30,10 Q50,5 70,10 T90,30 Q95,50 90,70 T70,90 Q50,95 30,90 T10,70 Q5,50 10,30 T30,10 Z"/></svg>');
+  background-size: 300px;
+  opacity: 0.3;
+  animation: about-bg-move 60s linear infinite;
+}
+
+/* About Content */
+.about-content {
+  max-width: 900px;
+  background: white;
+  padding: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-content:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* About Header */
+.about-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* About Title */
+.about-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  position: relative;
+  display: inline-block;
+  margin: 0;
+}
+
+.about-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(to right, #6e8efb, #a777e3);
+  border-radius: 2px;
+}
+
+/* About Description */
+.about-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #4a5568;
+  text-align: justify;
+}
+
+.about-description::first-letter {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6e8efb;
+  float: left;
+  margin-right: 8px;
+  line-height: 1;
+}
+
+/* Animations */
+@keyframes about-bg-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 300px 300px; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 1rem;
+  }
+  
+  .about-content {
+    padding: 2rem;
+  }
+  
+  .about-title {
+    font-size: 2.2rem;
+  }
+  
+  .about-description {
+    font-size: 1rem;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-content {
+    padding: 1.5rem;
+  }
+  
+  .about-title {
+    font-size: 1.8rem;
+  }
+  
+  .about-title::after {
+    width: 60px;
+    height: 3px;
+    bottom: -7px;
+  }
+}
