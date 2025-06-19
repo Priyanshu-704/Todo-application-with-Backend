@@ -49,10 +49,22 @@
 }
 
 .todo-title-input:focus,
-.todo-description-input:focus {
+.todo-description-input:focus,
+input[type="datetime-local"]:focus  {
   border-color: #6e8efb;
   box-shadow: 0 0 0 3px rgba(110, 142, 251, 0.2);
 }
+input[type="datetime-local"] {
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  color: #333;
+  font-weight: 500;
+}
+
 
 /* Submit Button */
 .todo-submit-btn {

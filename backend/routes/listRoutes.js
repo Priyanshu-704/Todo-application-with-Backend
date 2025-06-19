@@ -1,15 +1,20 @@
 const router = require("express").Router();
 const User = require("../models/user");
 const List = require("../models/list");
-const protect = require("../middleware/auth")
+const protect = require("../middleware/auth");
 
 //task added
 router.post("/addtask", protect, async (req, res) => {
   try {
-    const { title, description, id } = req.body;
+    const { title, description, id, dueDate } = req.body;
     const existingUser = await User.findById(id);
     if (existingUser) {
-      const list = new List({ title, description, user: existingUser });
+      const list = new List({
+        title,
+        description,
+        dueDate,
+        user: existingUser,
+      });
       await list.save().then(() => {
         res.status(200).json({ list });
       });
@@ -24,15 +29,17 @@ router.post("/addtask", protect, async (req, res) => {
 //update task
 router.put("/updatetask/:id", protect, async (req, res) => {
   try {
-    
-    const {title, description} = req.body;
-      const list = await List.findByIdAndUpdate(req.params.id, { title, description });
-      if (!list) {
-        return res.status(400).json({ message: "Task not found" });
-      }
+    const { title, description, dueDate } = req.body;
+    const list = await List.findByIdAndUpdate(req.params.id, {
+      title,
+      description,
+      dueDate,
+    });
+    if (!list) {
+      return res.status(400).json({ message: "Task not found" });
+    }
 
-      res.status(200).json({ message: "Task updated successfully" });
-    
+    res.status(200).json({ message: "Task updated successfully" });
   } catch (error) {
     console.log(error);
   }
@@ -42,10 +49,9 @@ router.put("/updatetask/:id", protect, async (req, res) => {
 router.delete("/deletetask/:id", protect, async (req, res) => {
   try {
     const { id } = req.body;
-    const existingUser = await User.findByIdAndUpdate(
-      id,
-      { $pull: { list: req.params.id } }
-    );
+    const existingUser = await User.findByIdAndUpdate(id, {
+      $pull: { list: req.params.id },
+    });
     if (existingUser) {
       await List.findByIdAndDelete(req.params.id).then(() => {
         res.status(200).json({ message: "Task deleted successfully" });
@@ -59,13 +65,14 @@ router.delete("/deletetask/:id", protect, async (req, res) => {
 //get Task
 router.get("/gettask/:id", protect, async (req, res) => {
   try {
-    const list = await List.find({ user: req.params.id }).sort({createdAt: -1});
-    if(list.length !==0){
-    res.status(200).json({ list: list });
-    }else{
-        res.status(200).json({message: "No tasks found"});
+    const list = await List.find({ user: req.params.id }).sort({
+      createdAt: -1,
+    });
+    if (list.length !== 0) {
+      res.status(200).json({ list: list });
+    } else {
+      res.status(200).json({ message: "No tasks found" });
     }
-    
   } catch (error) {
     console.log(error);
   }

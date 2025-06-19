@@ -6,13 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import Update from "./Update";
 import { useSelector } from "react-redux";
 
-
 const Todo = () => {
   const id = sessionStorage.getItem("id");
-const [showTextarea, setShowTextarea] = useState(false);
+  const [showTextarea, setShowTextarea] = useState(false);
   const [inputs, setInputs] = useState({
     title: "",
     description: "",
+    dueDate: "",
   });
   const [array, setArray] = useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -22,11 +22,8 @@ const [showTextarea, setShowTextarea] = useState(false);
   const fetchTasks = async () => {
     if (id) {
       try {
-        const response = await axiosInstance.get(
-          `/v2/gettask/${id}`
-        );
+        const response = await axiosInstance.get(`/v2/gettask/${id}`);
         setArray(response.data.list);
-        
       } catch {
         toast.error("Failed to fetch tasks");
       }
@@ -34,7 +31,7 @@ const [showTextarea, setShowTextarea] = useState(false);
   };
 
   const handleShow = () => {
-   setShowTextarea(true);
+    setShowTextarea(true);
   };
 
   const handlechange = (e) => {
@@ -43,14 +40,15 @@ const [showTextarea, setShowTextarea] = useState(false);
   };
 
   const handleSubmit = async () => {
-    if (inputs.title === "" || inputs.description === "") {
-      toast.error("Title and Description can not be empty ");
+    if (inputs.title === "" || inputs.description === "" || inputs.dueDate === "") {
+      toast.error("Title, Description and Due date can not be empty ");
     } else {
       if (id) {
         await axiosInstance
           .post("/v2/addtask", {
             title: inputs.title,
             description: inputs.description,
+            dueDate: inputs.dueDate,
             id: id,
           })
           .then((response) => {
@@ -58,21 +56,18 @@ const [showTextarea, setShowTextarea] = useState(false);
           });
         fetchTasks();
 
-         setInputs({ title: "", description: "" });
+        setInputs({ title: "", dueDate: "", description: "" });
         toast.success("Your task is added");
       }
       //  else {
       //   setArray([...array, inputs]);
-       
+
       //   toast.warning(
       //     "Your task is added locally but not saved! Please sign up"
       //   );
       // }
       setShowTextarea(false);
-      
     }
-   
-      
   };
 
   const handleDelete = async (CardId) => {
@@ -121,7 +116,7 @@ const [showTextarea, setShowTextarea] = useState(false);
         <ToastContainer />
         <div className=" todo-container d-flex flex-column justify-content-center align-items-center">
           <div className=" todo-form-container  w-50 p-1">
-            <div className="todo-input-group ">
+            <form className="todo-input-group ">
               <input
                 type="text"
                 placeholder="TITLE"
@@ -130,6 +125,18 @@ const [showTextarea, setShowTextarea] = useState(false);
                 className="todo-title-input my-3 "
                 onClick={handleShow}
                 onChange={handlechange}
+              />
+              <input
+                type="datetime-local"
+                value={inputs.dueDate}
+                className="todo-input-date"
+                onKeyDown={(e) => e.preventDefault()}
+                onChange={(e) =>
+                  setInputs({ ...inputs, dueDate: e.target.value })
+                }
+                onClick={(e) => {
+                  if (e.target.showPicker) e.target.showPicker(); 
+                }}
               />
               <textarea
                 type="text"
@@ -141,7 +148,7 @@ const [showTextarea, setShowTextarea] = useState(false);
                 id="textarea"
                 onChange={handlechange}
               />
-            </div>
+            </form>
           </div>
           <div className="d-flex justify-content-end w-50 add-task-btn-div">
             <button className="todo-submit-btn " onClick={handleSubmit}>
@@ -158,6 +165,7 @@ const [showTextarea, setShowTextarea] = useState(false);
                     <TodoCard
                       title={item.title}
                       description={item.description}
+                      dueDate={item.dueDate}
                       id={item._id}
                       delid={handleDelete}
                       displayBox={() => handleUpdate(index)}

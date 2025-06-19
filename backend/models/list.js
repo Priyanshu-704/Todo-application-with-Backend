@@ -9,6 +9,13 @@ const listSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+   dueDate: {
+    type: Date, // 📅 due date field
+  },
+   isCompleted: {
+    type: Boolean,
+    default: false,
+  },
   user: [
     {
       type: mongoose.Types.ObjectId,

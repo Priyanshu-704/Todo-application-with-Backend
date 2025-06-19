@@ -2,7 +2,7 @@ import React from "react";
 import { AiFillDelete } from "react-icons/ai";
 import { GrDocumentUpdate } from "react-icons/gr";
 import "./TodoCard.css";
-const TodoCard = ({ title, description, id, delid, displayBox }) => {
+const TodoCard = ({ title, description,dueDate, id, delid, displayBox }) => {
   const handleDelete = () => {
     delid(id);
   };
@@ -15,6 +15,9 @@ const TodoCard = ({ title, description, id, delid, displayBox }) => {
           {description.length > 77
             ? `${description.substring(0, 77)}...`
             : description}
+        </p>
+        <p>
+          <strong>Due:</strong> {new Date(dueDate).toLocaleString()}
         </p>
       </div>
       <div className="d-flex justify-content-around todo-card-actions">
