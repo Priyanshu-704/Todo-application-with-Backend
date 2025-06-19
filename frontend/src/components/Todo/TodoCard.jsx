@@ -63,7 +63,8 @@ const TodoCard = ({
             isCompleted ? "disabled-update-btn" : ""
           }`}
           onClick={handleUpdateClick}
-          style={{ cursor: "pointer" }}
+           style={{ cursor: isCompleted ? "not-allowed" : "pointer" }}
+          title={isCompleted ? "Cannot update completed task" : "Update Task"}
         >
           <GrDocumentUpdate className="todo-card-icon" /> Update
         </div>

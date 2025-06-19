@@ -126,6 +126,11 @@
 .todo-card-update:hover::before {
   transform: translateX(100%);
 }
+.disabled-update-btn {
+  pointer-events: all;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .todo-card-delete {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
