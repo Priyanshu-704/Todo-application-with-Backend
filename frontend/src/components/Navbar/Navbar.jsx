@@ -10,6 +10,7 @@ import axios from "axios";
 const Navbar = () => {
   const isLoggedIn = useSelector((state) => state.isLoggedIn);
   const dispatch = useDispatch();
+  const username = sessionStorage.getItem("username") || "User";
 
   const handleLogout = async () => {
     try {
@@ -63,7 +64,7 @@ const Navbar = () => {
                 About Us
               </Link>
             </li>
-           
+
             {!isLoggedIn && (
               <>
                 <li className="nav-item mx-2">
@@ -88,11 +89,15 @@ const Navbar = () => {
             )}
             {isLoggedIn && (
               <>
-               <li className="nav-item mx-2">
-              <Link className="nav-link active" aria-current="page" to="/todo">
-                Add Task
-              </Link>
-            </li>
+                <li className="nav-item mx-2">
+                  <Link
+                    className="nav-link active"
+                    aria-current="page"
+                    to="/todo"
+                  >
+                    Add Task
+                  </Link>
+                </li>
                 <li className="nav-item mx-2">
                   <Link
                     className="nav-link nav-btn"
@@ -104,11 +109,16 @@ const Navbar = () => {
                 </li>
                 <li className="nav-item mx-2">
                   <Link className="nav-link " aria-current="page" to="#">
-                    <img
-                      src="https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
-                      alt="user"
-                      className="img-fluid user-avatar"
-                    />
+                    <div className="avatar-tooltip">
+                      <img
+                        src="https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
+                        alt="user"
+                        className="img-fluid user-avatar"
+                      />
+                      <span className="tooltip-text">
+                        Logged in as {username}
+                      </span>
+                    </div>
                   </Link>
                 </li>
               </>

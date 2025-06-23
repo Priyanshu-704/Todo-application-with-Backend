@@ -15,6 +15,8 @@ const Signin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInputs({ ...inputs, [name]: value });
@@ -31,6 +33,7 @@ const Signin = () => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
       sessionStorage.setItem("id", user._id);
+        sessionStorage.setItem("username", user.username);
       dispatch(authActions.login());
       navigate("/todo");
     } catch (error) {
