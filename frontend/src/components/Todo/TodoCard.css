@@ -162,6 +162,20 @@
   pointer-events: none;
 }
 
+.todo-priority {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+.todo-priority.high {
+  color: red;
+}
+.todo-priority.medium {
+  color: orange;
+}
+.todo-priority.low {
+  color: green;
+}
+
 /* Completed Button Styling */
 .todo-complete-btn {
   width: 90%;

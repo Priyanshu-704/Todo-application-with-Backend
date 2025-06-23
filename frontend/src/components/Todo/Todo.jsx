@@ -5,6 +5,7 @@ import TodoCard from "./TodoCard";
 import { ToastContainer, toast } from "react-toastify";
 import Update from "./Update";
 import { useSelector } from "react-redux";
+import SmartPlan from "./SmartPlan";
 
 const Todo = () => {
   const id = sessionStorage.getItem("id");
@@ -13,24 +14,26 @@ const Todo = () => {
     title: "",
     description: "",
     dueDate: "",
+    priority: "Medium",
   });
   const [array, setArray] = useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("pending");
+  const [originalArray, setOriginalArray] = useState([]);
+  const [showCancelButton, setShowCancelButton] = useState(false);
   const isLoggedIn = useSelector((state) => state.isLoggedIn);
+  const [smartMode, setSmartMode] = useState(false);
 
   const fetchTasks = async () => {
     if (id) {
       try {
         const response = await axiosInstance.get(`/v2/gettask/${id}`);
         setArray(response.data.list);
-        console.log("Fetched tasks:", response.data.list);
       } catch {
         toast.error("Failed to fetch tasks");
       }
     }
-    
   };
 
   const handleShow = () => {
@@ -46,9 +49,10 @@ const Todo = () => {
     if (
       inputs.title === "" ||
       inputs.description === "" ||
-      inputs.dueDate === ""
+      inputs.dueDate === "" ||
+      inputs.priority === ""
     ) {
-      toast.error("Title, Description and Due date can not be empty ");
+      toast.error("Title, Description, Due date or Priority can not be empty ");
     } else {
       if (id) {
         await axiosInstance
@@ -56,6 +60,7 @@ const Todo = () => {
             title: inputs.title,
             description: inputs.description,
             dueDate: inputs.dueDate,
+            priority: inputs.priority,
             id: id,
           })
           .then((response) => {
@@ -110,11 +115,46 @@ const Todo = () => {
   const handleToggleComplete = async (taskId) => {
     try {
       await axiosInstance.put(`/v2/togglecomplete/${taskId}`);
-      
+
       fetchTasks();
     } catch {
       toast.error("Could not toggle task status");
     }
+  };
+  const fetchTaskSuggestions = async () => {
+    try {
+      setOriginalArray(array); // backup
+
+      const res = await axiosInstance.get("/v2/task-suggestions", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const suggestions = res.data.suggestions;
+
+      if (suggestions.length === 0) {
+        setArray([]); // clear task list
+        setSmartMode(true); // show message
+        setShowCancelButton(true); // show cancel button
+      } else {
+        setArray(suggestions);
+        setSmartMode(true); // enable smart mode
+        setShowCancelButton(true);
+        toast.success("Smart suggestions loaded!");
+      }
+    } catch (error) {
+      console.error("Suggestion fetch failed", error);
+      toast.error("Failed to get suggestions");
+    }
+  };
+
+  const cancelSuggestions = () => {
+    setArray(originalArray);
+    setOriginalArray([]);
+    setShowCancelButton(false);
+    setSmartMode(false);
+    toast.info("Suggestions cancelled. Original list restored.");
   };
 
   useEffect(() => {
@@ -143,18 +183,55 @@ const Todo = () => {
                 onClick={handleShow}
                 onChange={handlechange}
               />
-              <input
-                type="datetime-local"
-                value={inputs.dueDate}
-                className="todo-input-date"
-                onKeyDown={(e) => e.preventDefault()}
-                onChange={(e) =>
-                  setInputs({ ...inputs, dueDate: e.target.value })
-                }
-                onClick={(e) => {
-                  if (e.target.showPicker) e.target.showPicker();
-                }}
-              />
+              {showTextarea && (
+                <input
+                  type="datetime-local"
+                  value={inputs.dueDate}
+                  className="todo-input-date"
+                  min={new Date().toISOString().slice(0, 16)}
+                  onKeyDown={(e) => e.preventDefault()}
+                  onChange={(e) =>
+                    setInputs({ ...inputs, dueDate: e.target.value })
+                  }
+                  onClick={(e) => {
+                    if (e.target.showPicker) e.target.showPicker();
+                  }}
+                />
+              )}
+              {showTextarea && (
+                <div className="todo-priority-options my-2">
+                  <label className="priority-label">
+                    <input
+                      type="radio"
+                      name="priority"
+                      value="High"
+                      checked={inputs.priority === "High"}
+                      onChange={handlechange}
+                    />
+                    <span className="priority-high">High</span>
+                  </label>
+                  <label className="priority-label">
+                    <input
+                      type="radio"
+                      name="priority"
+                      value="Medium"
+                      checked={inputs.priority === "Medium"}
+                      onChange={handlechange}
+                    />
+                    <span className="priority-medium">Medium</span>
+                  </label>
+                  <label className="priority-label">
+                    <input
+                      type="radio"
+                      name="priority"
+                      value="Low"
+                      checked={inputs.priority === "Low"}
+                      onChange={handlechange}
+                    />
+                    <span className="priority-low">Low</span>
+                  </label>
+                </div>
+              )}
               <textarea
                 type="text"
                 placeholder="DESCRIPTION"
@@ -199,10 +276,32 @@ const Todo = () => {
             >
               Completed
             </button>
+            {!showCancelButton ? (
+              <button className="smart-btn" onClick={fetchTaskSuggestions}>
+                Get Smart Plan
+              </button>
+            ) : (
+              <button
+                className="smart-btn btn-cancel"
+                onClick={cancelSuggestions}
+              >
+                Cancel Smart Plan
+              </button>
+            )}
           </div>
 
           <div className="todo-grid">
-            {array &&
+            {smartMode ? (
+              <SmartPlan
+                tasks={array}
+                onCancel={cancelSuggestions}
+                filter={filter}
+                handleUpdate={handleUpdate}
+                handleDelete={handleDelete}
+                toggleComplete={handleToggleComplete}
+              />
+            ) : (
+              array &&
               array
                 .filter((item) => {
                   if (filter === "all") return true;
@@ -210,23 +309,23 @@ const Todo = () => {
                   if (filter === "pending") return !item.isCompleted;
                   return true;
                 })
-                .map((item, index) => {
-                  return (
-                    <div className=" todo-card-wrapper" key={index}>
-                      <TodoCard
-                        title={item.title}
-                        description={item.description}
-                        dueDate={item.dueDate}
-                        id={item._id}
-                        isCompleted={item.isCompleted}
-                        delid={handleDelete}
-                        displayBox={() => handleUpdate(index)}
-                        toggleComplete={handleToggleComplete}
-                        currentFilter={filter} 
-                      />
-                    </div>
-                  );
-                })}
+                .map((item, index) => (
+                  <div className=" todo-card-wrapper" key={index}>
+                    <TodoCard
+                      title={item.title}
+                      description={item.description}
+                      dueDate={item.dueDate}
+                      priority={item.priority}
+                      id={item._id}
+                      isCompleted={item.isCompleted}
+                      delid={handleDelete}
+                      displayBox={() => handleUpdate(index)}
+                      toggleComplete={handleToggleComplete}
+                      currentFilter={filter}
+                    />
+                  </div>
+                ))
+            )}
           </div>
         </div>
       </div>

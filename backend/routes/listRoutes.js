@@ -6,13 +6,14 @@ const protect = require("../middleware/auth");
 //task added
 router.post("/addtask", protect, async (req, res) => {
   try {
-    const { title, description, id, dueDate } = req.body;
+    const { title, description, id, dueDate, priority } = req.body;
     const existingUser = await User.findById(id);
     if (existingUser) {
       const list = new List({
         title,
         description,
         dueDate,
+        priority,
         user: existingUser,
       });
       await list.save().then(() => {
@@ -92,6 +93,42 @@ router.put("/togglecomplete/:taskId", protect, async (req, res) => {
     res.status(500).json({ message: "Error updating task", error });
   }
 });
+
+//task auto suggestions
+router.get("/task-suggestions", protect, async (req, res) => {
+  try {
+    const allTasks = await List.find({ user: req.user.id, isCompleted: false });
+
+    // Get today's date range (start and end)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    // Filter only tasks due today
+    const todaysTasks = allTasks.filter((task) => {
+      const due = new Date(task.dueDate);
+      return due >= startOfToday && due <= endOfToday;
+    });
+
+    // Sort by priority and dueDate
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+
+    const sortedTasks = todaysTasks.sort((a, b) => {
+      const priorityCompare =
+        priorityOrder[a.priority] - priorityOrder[b.priority];
+      if (priorityCompare !== 0) return priorityCompare;
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    });
+
+    res.json({ suggestions: sortedTasks });
+  } catch (error) {
+    console.error("Suggestion error:", error);
+    res.status(500).json({ message: "Server error while suggesting tasks." });
+  }
+});
+
 
 
 module.exports = router;

@@ -7,6 +7,7 @@ const TodoCard = ({
   title,
   description,
   dueDate,
+  priority,
   isCompleted,
   id,
   delid,
@@ -41,6 +42,9 @@ const TodoCard = ({
         <p>
           <strong>Due:</strong> {new Date(dueDate).toLocaleString()}
         </p>
+        <p className={`todo-priority ${priority.toLowerCase()}`}>
+  <strong>Priority:</strong> {priority}
+</p>
         <div className="form-check mt-2">
           {!isCompleted && (
             <button
